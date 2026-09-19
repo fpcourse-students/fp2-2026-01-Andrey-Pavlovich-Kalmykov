@@ -5,7 +5,7 @@ import Text.PrettyPrint.GenericPretty
 import MetaUtils
 
 -- | Перечень бинарных операций.
-data BinOp = Plus | Mult | Less | LessEq | Equal
+data BinOp = Plus | Minus | Mult | Div | Less | LessEq | Equal
 
 -- | Синоним предметной области для типа имён переменных в AST.
 type Name = String
@@ -19,6 +19,7 @@ data Expr
   | Var Name
   | BinOp BinOp Expr Expr
   | Match Expr [Branch]
+  | Ctor Name [Expr]
 
 -- | Паттерны.
 data Pattern
