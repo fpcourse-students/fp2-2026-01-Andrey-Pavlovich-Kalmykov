@@ -39,13 +39,36 @@ evalExpr expr env = case expr of
     Nothing -> error $ "ERROR: Undefined variable '" <> name <> "'"
     Just value -> value
   BinOp op lhs rhs -> evalBinOp op (evalExpr lhs env) (evalExpr rhs env)
-  Match _ _ -> todo "Match"
+  Match expr' brs ->
+    let val = evalExpr expr' env
+        matchPattern pat value env' = case (pat, value) of
+          (ConstPat n, Number n') -> if n == n' then Just env' else Nothing
+          (VarPat name, _) -> Just (Map.insert name value env')
+          (CtorPat tag ps, Object tag' vs) ->
+            if tag == tag' && length ps == length vs
+            then matchPats ps vs env'
+            else Nothing
+          _ -> Nothing
+        matchPats [] [] env' = Just env'
+        matchPats (p:ps) (v:vs) env' = case matchPattern p v env' of
+          Just env'' -> matchPats ps vs env''
+          Nothing -> Nothing
+        matchPats _ _ _ = Nothing
+        tryBranch (Branch pat expr'') = case matchPattern pat val env of
+          Just newEnv -> Just (evalExpr expr'' newEnv)
+          Nothing -> Nothing
+    in case asum (map tryBranch brs) of
+         Just result -> result
+         Nothing -> error "ERROR: No matching branch"
+  Ctor tag xs -> Object tag $ map (flip evalExpr env) xs
 
 -- | Интерпретатор бинарных операций.
 evalBinOp :: BinOp -> Value -> Value -> Value
 evalBinOp op = case op of
   Plus -> wrapNum (+)
+  Minus -> wrapNum (-)
   Mult -> wrapNum (*)
+  Div -> wrapNum div
   Less -> wrapBool (<)
   LessEq -> wrapBool (<=)
   Equal -> wrapBool (==)

@@ -12,7 +12,7 @@ v :: Name -> Expr
 v = Var
 
 new :: Ctor -> [Expr] -> Expr
-new = todo "new"
+new = Ctor
 
 infixl 6 .+
 infixl 6 .-
@@ -23,9 +23,9 @@ infix 4 .<=
 infix 4 .==
 (.+), (.-), (.*), (./), (.<), (.<=), (.==) :: Expr -> Expr -> Expr
 (.+) = BinOp Plus
-(.-) = todo ".-"
+(.-) = BinOp Minus
 (.*) = BinOp Mult
-(./) = todo "./"
+(./) = BinOp Div
 (.<) = BinOp Less
 (.<=) = BinOp LessEq
 (.==) = BinOp Equal
